@@ -1,0 +1,47 @@
+
+-- This BATCH FILE LOAD TABLES FROM local system to ANALYTIC_OPS.ANALYTICS.DRIVER_DAILY_BOOKING for INTLCM HORASPHERE DATA
+
+
+-- Lines 1 to 4 come from file :
+-- BI_Snowflake/DB_DATASTORE_HORASPHERE/TABLES/RAW.DRIVER_BOOKING.sql
+
+-- 1. Login to snowsql
+    -- snowSQl must be installed on local system
+    -- Execute on Windows command line :
+            --snowsql -a jv88438.ca-central-1.aws -u alaurier
+            --pwd
+            
+            --OR
+
+            --snowsql -c CaCentral -f "C:/Users/nasl/Desktop/RAW.DRIVER_BOOKING_BATCH_SQL.sql"
+            --NOTE: CaCentral is a predefined connection profile stored on C:/Users/Luis Villavicencio/.snowsql/config
+
+    SELECT 'START BATCH FILE' as INFO;
+
+-- 2. Select the right DATABASE AND SCHEMA (in case you are not in as a default)
+
+    USE DATABASE DATASTORE_HORASPHERE_DEV;
+    -->USE DATABASE DATASTORE_HORASPHERE_DEV;
+    USE SCHEMA RAW;
+
+-- 3. Load the files from local system to the stage:
+
+
+    -- Load INTLCM file
+    PUT 'file://C:/Users/alaurier/Desktop/Manual_Load_Horasphere/ToBeLoaded/INTLCM/BookingReport_ALL_*.csv' @CSV_STAGE_RAW_MANUAL/BOOKING OVERWRITE=TRUE;
+    -- If path is enclosed in single quotes, spaces in the file path are permitted. the drive and path separator is a forward slash (/) when quoted.
+	SELECT 'INTLCM FILE LOADED' as INFO;
+
+
+    -- Load DGFLY file
+    PUT 'file://C:/Users/alaurier/Desktop/Manual_Load_Horasphere/ToBeLoaded/DGFLY/BookingReport_ALL_*.csv' @CSV_STAGE_RAW_MANUAL_DGFLY/BOOKING OVERWRITE=TRUE;
+    -- If path is enclosed in single quotes, spaces in the file path are permitted. the drive and path separator is a forward slash (/) when quoted.
+    -- It will charge all "BookingReport_ALL_*.csv" files
+	SELECT 'DGFLY FILE LOADED' as INFO;
+
+--  4. Execute the Master Stored Proc
+--  		a. copy the from stage to Raw table
+--			b.  LOAD TABLE ANALYTICS.DRIVER_DAILY_BOOKING
+
+	CALL DATASTORE_HORASPHERE.RAW.MASTER_HORASPHERE_TASK_DRIVER_BOOKING_P('DEVELOPMENT');
+
