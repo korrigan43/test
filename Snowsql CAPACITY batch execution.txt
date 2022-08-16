@@ -1,1 +1,0 @@
-snowsql -c INTLC -f "E:\TMP\RAW.DRIVER_CAPACITY_BATCH_SQL.sql"
